@@ -1,5 +1,6 @@
 # market_alert_bot
-Telegram Market Alert Bot in Python
+Telegram Market Alert Bot in Python.
+This bot shows the currency conversion of COP (Colombian Pesos) and VEB (Venezuelan Bs) to US Dollars, and any Crypto currency value in US Dollar.
 
 ## How to use the Bot
 
@@ -10,16 +11,16 @@ Telegram Market Alert Bot in Python
 
 ## How to use the repo
 
-Open a Terminal window.
-Change to the parent directory you use to store your repos.
-Then run these commands:
+- Open a Terminal window.
+- Change to the parent directory you use to store your repos.
+- Then run these commands:
 
 ```bash
 git clone https://github.com/tomkat-cr/market_alert_bot.git
 cd market_alert_bot
 ```
 
-All the magic is in the `api` directory...
+- All the magic is in the `index.py` file on the `api` directory...
 
 ## How to deploy to fly.io
 
@@ -30,8 +31,7 @@ Create the Bot on Telegram:
 - Double click on the `@botfather` entry
 - Click on the `Start` link at the bottom of the chat section.
 - Use `/newbot` command to create the bot.
-- Follow on-screen instructions to assign a bot user name, bot name, etc.
-- In the bot name, use a different name than `@ocr_marketalert_bot` (please ;)
+- Follow on-screen instructions to assign a bot user name, bot name, etc. Please use a different name than `@ocr_marketalert_bot` ;)
 - That the end of the process, copy the Telegram Bot Token and store it in a secure place.
 
 Create the .env file:
@@ -57,7 +57,31 @@ Finally deploy it running this command:
 sh run_fly_io.sh deploy
 ```
 
-## Bot local ruunning
+## Bot local running in Polling mode
+
+Use the Polling mode when you can use a server that allow constant running of the python app.
+
+- Edit the `.env` file and un-comment this line:
+
+```
+# RUN_MODE=cli
+```
+
+- Run these commands:
+
+```bash
+sh run_fly_io.sh run
+```
+
+## Bot local running in Webhook mode
+
+Use the Webhook mode when you need to deploy the bot as a serverless function.
+
+- Edit the `.env` file and comment this line by adding a `#` as a first character:
+
+```
+RUN_MODE=cli
+```
 
 - Run these commands:
 
@@ -84,7 +108,7 @@ Forwarding                    https://6272-190-73-192-124.ngrok.io -> http://loc
 - Run this command replacing `[FORWARDING_URL]` with the URL copied in a previous step:
 
 ```bash
-sh run_fly_io.sh run_webhook `[FORWARDING_URL]`
+sh run_fly_io.sh run_webhook [FORWARDING_URL]
 ```
 - Go to Telegram and test your Bot.
 - Enjoy!

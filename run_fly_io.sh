@@ -51,10 +51,13 @@ fi
 if [ "$1" = "run_ngrok" ]; then
     ../node_modules/ngrok/bin/ngrok http $PORT
 fi
+if [ "$1" = "run" ]; then
+    python index.py
+fi
 if [ "$1" = "run_webhook" ]; then
     if [ "$2" != "" ]; then
         SERVER_NAME=$2
-        sh ../run_vercel.sh set_webhook $2
+        sh ../run_fly_io.sh set_webhook $2
     fi
     python index.py
 fi
