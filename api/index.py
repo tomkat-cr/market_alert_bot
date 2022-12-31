@@ -137,8 +137,13 @@ def currency_exchange(update, context):
 
 
 def main():
-    # Updater creation with Telegram bot access token
+
+    bot_run_mode = os.environ.get('RUN_MODE', 'webhook')
+    bot_port = os.environ.get('PORT', '443')
+    bot_server_name = os.environ.get('SERVER_NAME', False)
     telegram_bot_token = os.environ['TELEGRAM_BOT_TOKEN']
+
+    # Updater creation with Telegram bot access token
     updater = Updater(telegram_bot_token, use_context=True)
 
     # Start command
@@ -151,11 +156,28 @@ def main():
     updater.dispatcher.add_handler(CommandHandler('currency', currency_exchange))
 
     # Bot init
-    print('Start polling...')
-    updater.start_polling(timeout=1600)
+    if bot_run_mode == 'cli':
+        print('Start polling...')
+        updater.start_polling(timeout=1600)
+    else:
+        print('Webhook mode...')
+        print(f'bot_server_name: {bot_server_name}:{bot_port}')
+        if not bot_server_name:
+            raise Exception("ERROR: Server Name variable for not set")
+        print('Start webhook...')
+        updater.start_webhook(
+            listen='0.0.0.0',
+            port=int(bot_port),
+            url_path=telegram_bot_token,
+            webhook_url=f'{bot_server_name}/{telegram_bot_token}',
+        )
+        # updater.bot.set_webhook(
+        #     f'{bot_server_name}/{telegram_bot_token}'
+        # )
     print('Wait for requests...')
     updater.idle()
+    return updater
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+app = main()

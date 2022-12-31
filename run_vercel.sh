@@ -7,7 +7,7 @@ if [ "$1" = "deactivate" ]; then
     deactivate ;
 fi
 if [[ "$1" != "deactivate" && "$1" != "pipfile" && "$1" != "clean" ]]; then
-    set -o allexport; . "./.env"; set +o allexport ;
+    set -o allexport; source "./.env"; set +o allexport ;
     python3 -m venv api ;
     . api/bin/activate ;
     cd api ;
