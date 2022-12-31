@@ -1,6 +1,6 @@
 #!/bin/sh
-# run_vercel.sh
-# 2022-12-30 | CR
+# run_fly_io.sh
+# 2022-12-31 | CR
 #
 if [ -f "./.env" ]; then
     ENV_FILESPEC="./.env"
@@ -25,17 +25,18 @@ if [ "$1" = "pipfile" ]; then
     deactivate ;
     pipenv lock
 fi
+if [ "$1" = "create_app" ]; then
+    flyctl auth login
+    flyctl apps create ${FLYIO_APP_NAME}
+    flyctl secrets set TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+    flyctl secrets set SERVER_NAME=${FLYIO_APP_NAME}.fly.dev
+    flyctl secrets set RUN_MODE=cli
+fi
 if [ "$1" = "deploy" ]; then
-    vercel ;
+    flyctl deploy ;
 fi
 if [ "$1" = "deploy_prod" ]; then
-    vercel --prod ;
-fi
-if [ "$1" = "rename_staging" ]; then
-    vercel alias $2 ${APP_NAME}-staging-tomkat-cr.vercel.app
-fi
-if [[ "$1" = "" || "$1" = "vercel" ]]; then
-    vercel dev --listen 0.0.0.0:$PORT ;
+    flyctl deploy ;
 fi
 if [ "$1" = "clean" ]; then
     echo "Cleaning..."
