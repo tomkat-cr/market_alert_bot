@@ -138,3 +138,6 @@ api/lib
 api/pyvenv.cfg
 api/logs/api_general.log
 api/var
+
+# Editor
+.vscode

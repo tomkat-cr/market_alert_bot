@@ -2,6 +2,7 @@
 # run_vercel.sh
 # 2022-12-30 | CR
 #
+APP_DIR='api'
 if [ -f "./.env" ]; then
     ENV_FILESPEC="./.env"
 else
@@ -12,13 +13,13 @@ if [ "$PORT" = "" ]; then
     PORT="8000"
 fi
 if [ "$1" = "deactivate" ]; then
-    cd api ;
+    cd ${APP_DIR} ;
     deactivate ;
 fi
 if [[ "$1" != "deactivate" && "$1" != "pipfile" && "$1" != "clean" && "$1" != "set_webhook" ]]; then
-    python3 -m venv api ;
-    . api/bin/activate ;
-    cd api ;
+    python3 -m venv ${APP_DIR} ;
+    . ${APP_DIR}/bin/activate ;
+    cd ${APP_DIR} ;
     pip3 install -r requirements.txt ;
 fi
 if [ "$1" = "pipfile" ]; then

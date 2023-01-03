@@ -9,7 +9,10 @@ from telegram.ext import Updater, CommandHandler
 import serial.tools.list_ports
 
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
 
 
 def get_bot_version():
@@ -27,7 +30,11 @@ def serial_ports():
 
 def start(update, context):
     print('Command: /start')
-    update.message.reply_text(f'Hello! I\'m the Mediabros Market Alert bot version {get_bot_version()}.\nUse /help to get the command list.\nHow can I help you today baby?')
+    update.message.reply_text(
+        'Hello! I\'m the Mediabros Market Alert bot version '
+        f'{get_bot_version()}.'
+        '\nUse /help to get the command list.'
+        '\nHow can I help you today baby?')
 
 
 def help(update, context):
@@ -35,13 +42,17 @@ def help(update, context):
     update.message.reply_text(
         'Command Help:\n\n'
         '/help = get this documentation.\n'
-        '/currency usdcop = get the USD to COP (Colombian Peso) exchange rate.\n'
+        '/currency usdcop = get the USD to COP (Colombian Peso)'
+        ' exchange rate.\n'
         '/cur cop = same as /currency usdcop\n'
-        '/currency usdveb = get the USD to VEB (Venezuelan Bolivar) exchange rate.\n'
+        '/currency usdveb = get the USD to VEB (Venezuelan Bolivar)'
+        ' exchange rate.\n'
         '/cur veb = same as /currency usdveb\n'
-        '/crypto [symbol] = get the crypto currency symbol exchange to USD. [symbol] can be btc, eth, sol, ada, xrp, etc.\n'
+        '/crypto [symbol] = get the crypto currency symbol exchange to USD.'
+        ' [symbol] can be btc, eth, sol, ada, xrp, etc.\n'
         '\n'
-        'NOTE: adding the word "debug" makes the command to return the API\'s raw responses'
+        'NOTE: adding the word "debug" makes the command to return the API\'s'
+        ' raw responses'
         '\n'
     )
 
@@ -58,8 +69,10 @@ def crypto(symbol, currency, debug):
     response_message = 'ERROR: unknown [CRYPTO-E-010]'
     currency = currency.upper()
     symbol = symbol.upper()
-    # url = f'https://min-api.cryptocompare.com/data/price?fsym=ETH&tsyms=BTC,USD,EUR'
-    url = f'https://min-api.cryptocompare.com/data/price?fsym={symbol}&tsyms={currency}'
+    # url = 'https://min-api.cryptocompare.com/data/price?'
+    # 'fsym=ETH&tsyms=BTC,USD,EUR'
+    url = 'https://min-api.cryptocompare.com/data/price?'
+    f'fsym={symbol}&tsyms={currency}'
     response = requests.get(url)
 
     # Process result
@@ -68,8 +81,11 @@ def crypto(symbol, currency, debug):
         if debug:
             response_message = f'The {symbol} exchange rate is: {result}'
         else:
-            exchange_rate = f'{float(result[currency]):.2f}' if currency in result else f"ERROR: no {currency} element in API result"
-            response_message = f'The {symbol} to {currency} exchange rate is: {exchange_rate}'
+            exchange_rate = f'{float(result[currency]):.2f}' \
+                if currency in result \
+                else f"ERROR: no {currency} element in API result"
+            response_message = f'The {symbol} to {currency} exchange rate is:'
+            f' {exchange_rate}'
     else:
         # Report to user for API call error
         response_message = 'ERROR reading the min-api.cryptocompare.com API'
@@ -78,7 +94,7 @@ def crypto(symbol, currency, debug):
 
 def usdveb(debug):
     response_message = 'ERROR: unknown [USDVEB-E-010]'
-    url = f'https://s3.amazonaws.com/dolartoday/data.json'
+    url = 'https://s3.amazonaws.com/dolartoday/data.json'
     response = requests.get(url)
 
     # Process result
@@ -89,7 +105,8 @@ def usdveb(debug):
         else:
             exchange_rate = float(result['USD']['transferencia'])
             from_date = result['_timestamp']['fecha_corta']
-            response_message = f'The Bs exchange rate is: {exchange_rate:.2f} Bs/USD.\nDate: {from_date}'
+            response_message = f'The Bs exchange rate is: {exchange_rate:.2f}'
+            f' Bs/USD.\nDate: {from_date}'
     else:
         # Report to user for API call error
         response_message = 'ERROR reading the USD/Bs API'
@@ -98,7 +115,9 @@ def usdveb(debug):
 
 def usdcop(debug):
     response_message = 'ERROR: unknown [USDCOP-E-010]'
-    url = f'https://www.datos.gov.co/api/id/32sa-8pi3.json?$query=select%20*%2C%20%3Aid%20order%20by%20%60vigenciadesde%60%20desc%20limit%201'
+    url = 'https://www.datos.gov.co/api/id/32sa-8pi3.json?'
+    '$query=select%20*%2C%20%3Aid%20order%20by%20%60vigenciadesde'
+    '%60%20desc%20limit%201'
     response = requests.get(url)
 
     # Process result
@@ -125,9 +144,10 @@ def usdcop(debug):
                     "%Y-%m-%dT%H:%M:%S.000"
                 ), "%B %d, %Y"
             )
-            # Python 3's f-Strings: `:.2f` to format a float with 2 decimal places
+            # Python 3's f-Strings: `:.2f` to format float w/2 decimal places
             # https://realpython.com/python-f-strings/
-            response_message = f'The COP exchange rate is: {exchange_rate:.2f} COP/USD.\nFrom: {from_date}, to: {to_date}'
+            response_message = f'The COP exchange rate is: {exchange_rate:.2f}'
+            f' COP/USD.\nFrom: {from_date}, to: {to_date}'
     else:
         # Report to user for API call error
         response_message = 'ERROR reading the datos.gov.co USD/COP API'
@@ -190,7 +210,9 @@ def main():
     bot_version = get_bot_version()
     bot_run_mode = os.environ.get('RUN_MODE', 'webhook')
     bot_listen_addr = os.environ.get('LISTEN_ADDR', '0.0.0.0')
-    # bot_port = os.environ.get('PORT', '80') # PermissionError: [Errno 13] Permission denied
+    # -> Vercel: PermissionError: [Errno 13] Permission denied
+    # bot_port = os.environ.get('PORT', '80')
+    # <- Vercel: PermissionError: [Errno 13] Permission denied
     # bot_port = os.environ.get('PORT', '5000')
     bot_port = os.environ.get('PORT', '3000')
     bot_server_name = os.environ.get('SERVER_NAME', False)
@@ -206,7 +228,9 @@ def main():
     updater.dispatcher.add_handler(CommandHandler('help', help))
 
     # /currency command
-    updater.dispatcher.add_handler(CommandHandler('currency', currency_exchange))
+    updater.dispatcher.add_handler(
+        CommandHandler('currency', currency_exchange)
+    )
 
     # /cur command
     updater.dispatcher.add_handler(CommandHandler('cur', currency_exchange))
