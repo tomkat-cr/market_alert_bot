@@ -21,7 +21,7 @@ OWNER = ''
 
 
 def get_bot_version():
-    return os.environ.get('BOT_VERSION', '0.1.9')
+    return os.environ.get('BOT_VERSION', '0.1.10')
 
 
 # Debugging
@@ -54,6 +54,7 @@ def report_error_to_tg_group(api_response):
     return send_tg_message(OWNER, {
         'type': 'ERROR in a Mediabros API',
         'app_name': os.environ.get('APP_NAME', 'telegram-market-alert-bot'),
+        'server_name': os.environ.get('SERVER_NAME'),
         'calling_func': sys._getframe(1).f_code.co_name,
         'error_message': api_response['error_message'],
     })
@@ -83,7 +84,9 @@ def crypto_api(symbol, currency):
         # Ok response:
         # {'USD': 0.2741}
         # Error response:
-        # {'Response': 'Error', 'Message': 'fsym is a required param.', 'HasWarning': False, 'Type': 2, 'RateLimit': {}, 'Data': {}, 'ParamWithError': 'fsym'}
+        # {'Response': 'Error', 'Message': 'fsym is a required param.',
+        # 'HasWarning': False, 'Type': 2, 'RateLimit': {}, 'Data': {},
+        # 'ParamWithError': 'fsym'}
     except Exception as err:
         api_response['error'] = True
         api_response['error_message'] = str(err)
@@ -104,7 +107,7 @@ def crypto_api(symbol, currency):
 
 def veb_bcv_api():
     api_response = get_api_standard_response()
-    url = 'https://bcv-exchange-rates.vercel.app/1get_exchange_rates'
+    url = 'https://bcv-exchange-rates.vercel.app/get_exchange_rates'
     try:
         response = requests.get(url)
     except Exception as err:
