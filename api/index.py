@@ -7,6 +7,7 @@ import sys
 
 from telegram.ext import Updater, CommandHandler
 import serial.tools.list_ports
+from a2wsgi import ASGIMiddleware
 
 
 logging.basicConfig(
@@ -16,7 +17,7 @@ logging.basicConfig(
 
 
 def get_bot_version():
-    return os.environ.get('BOT_VERSION', '0.1.7')
+    return os.environ.get('BOT_VERSION', '0.1.8')
 
 
 def serial_ports():
@@ -69,10 +70,10 @@ def crypto(symbol, currency, debug):
     response_message = 'ERROR: unknown [CRYPTO-E-010]'
     currency = currency.upper()
     symbol = symbol.upper()
-    # url = 'https://min-api.cryptocompare.com/data/price?'
+    # url = 'https://min-api.cryptocompare.com/data/price?' + \
     # 'fsym=ETH&tsyms=BTC,USD,EUR'
-    url = 'https://min-api.cryptocompare.com/data/price?'
-    f'fsym={symbol}&tsyms={currency}'
+    url = 'https://min-api.cryptocompare.com/data/price?' + \
+        f'fsym={symbol}&tsyms={currency}'
     response = requests.get(url)
 
     # Process result
@@ -84,16 +85,38 @@ def crypto(symbol, currency, debug):
             exchange_rate = f'{float(result[currency]):.2f}' \
                 if currency in result \
                 else f"ERROR: no {currency} element in API result"
-            response_message = f'The {symbol} to {currency} exchange rate is:'
-            f' {exchange_rate}'
+            response_message = f'The {symbol} to {currency} ' + \
+                f'exchange rate is: {exchange_rate}'
     else:
         # Report to user for API call error
         response_message = 'ERROR reading the min-api.cryptocompare.com API'
     return response_message
 
 
-def usdveb(debug):
-    response_message = 'ERROR: unknown [USDVEB-E-010]'
+def veb_bcv(debug):
+    response_message = 'ERROR: unknown [VEB_DOLARTODAY-E-010]'
+    url = 'https://bcv-exchange-rates.vercel.app/get_exchange_rates'
+    response = requests.get(url)
+
+    # Process result
+    if response.status_code == 200:
+        result = response.json()
+        if debug:
+            response_message = f'BCV official exchange rates: {result}'
+        else:
+            exchange_rate = float(result['data']['dolar']['value'])
+            effective_date = result['data']['effective_date']
+            response_message = 'BCV official exchange rate:' + \
+                f' {exchange_rate:.2f} Bs/USD.\n' + \
+                f'Effective Date: {effective_date}'
+    else:
+        # Report to user for API call error
+        response_message = 'ERROR reading the BCV official USD/Bs API'
+    return response_message
+
+
+def veb_dolartoday(debug):
+    response_message = 'ERROR: unknown [VEB_DOLARTODAY-E-010]'
     url = 'https://s3.amazonaws.com/dolartoday/data.json'
     response = requests.get(url)
 
@@ -101,15 +124,22 @@ def usdveb(debug):
     if response.status_code == 200:
         result = response.json()
         if debug:
-            response_message = f'The VEB/USD exchange rate is: {result}'
+            response_message = f'DolarToday exchange rate: {result}'
         else:
             exchange_rate = float(result['USD']['transferencia'])
             from_date = result['_timestamp']['fecha_corta']
-            response_message = f'The Bs exchange rate is: {exchange_rate:.2f}'
-            f' Bs/USD.\nDate: {from_date}'
+            response_message = 'DolarToday exchange rate:' + \
+                f' {exchange_rate:.2f} Bs/USD.\n' + \
+                f'Date: {from_date}'
     else:
         # Report to user for API call error
         response_message = 'ERROR reading the USD/Bs API'
+    return response_message
+
+
+def usdveb(debug):
+    response_message = veb_bcv(debug)
+    response_message += '\n\n' + veb_dolartoday(debug)
     return response_message
 
 
@@ -146,8 +176,9 @@ def usdcop(debug):
             )
             # Python 3's f-Strings: `:.2f` to format float w/2 decimal places
             # https://realpython.com/python-f-strings/
-            response_message = f'The COP exchange rate is: {exchange_rate:.2f}'
-            f' COP/USD.\nFrom: {from_date}, to: {to_date}'
+            response_message = 'The COP exchange rate is: ' + \
+                f'{exchange_rate:.2f} COP/USD.\n' + \
+                f'From: {from_date}, to: {to_date}'
     else:
         # Report to user for API call error
         response_message = 'ERROR reading the datos.gov.co USD/COP API'
@@ -171,7 +202,7 @@ def currency_exchange(update, context):
     # Select currency pair
     if currency_pair in ('usdcop', 'cop'):
         response_message = usdcop(debug)
-    elif currency_pair in ('usdveb', 'veb', 'vef'):
+    elif currency_pair in ('usdveb', 'veb', 'vef', 'bs'):
         response_message = usdveb(debug)
     elif currency_pair in ('usdbtc', 'btc'):
         response_message = btc(debug)
@@ -248,7 +279,7 @@ def main():
         print(f'bot_server_name [webhook_url]: {bot_server_name}')
         print(f'Listen to: {bot_listen_addr}:{bot_port}')
         if not bot_server_name:
-            raise Exception("ERROR: Server Name variable for not set")
+            raise Exception("ERROR: Server Name variable not set")
         print('Starting webhook...')
         webhook = updater.bot.get_webhook_info()
         print(updater.bot.get_me())
@@ -262,8 +293,6 @@ def main():
             updater.start_webhook(
                 listen=bot_listen_addr,
                 port=int(bot_port),
-                # url_path=telegram_bot_token,
-                # webhook_url=f'{bot_server_name}/{telegram_bot_token}',
                 webhook_url=f'{bot_server_name}',
                 drop_pending_updates=True,
             )
@@ -271,12 +300,13 @@ def main():
     print('Ports report...')
     print(serial_ports())
 
-    print('Wait for requests...')
+    print(f'[{bot_run_mode}] Wait for requests...')
     updater.idle()
 
-    return updater
+    if bot_run_mode == 'cli':
+        return updater
+    else:
+        return ASGIMiddleware(updater)
 
 
-# if __name__ == '__main__':
-# app = main()
 handler = main()

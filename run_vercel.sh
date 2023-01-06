@@ -20,7 +20,14 @@ if [[ "$1" != "deactivate" && "$1" != "pipfile" && "$1" != "clean" && "$1" != "s
     python3 -m venv ${APP_DIR} ;
     . ${APP_DIR}/bin/activate ;
     cd ${APP_DIR} ;
-    pip3 install -r requirements.txt ;
+    if [ -f "requirements.txt" ]; then
+        pip3 install -r requirements.txt
+    else
+        pip install python-telegram-bot
+        pip install pyserial
+        pip install a2wsgi
+        pip freeze > requirements.txt
+    fi
 fi
 if [ "$1" = "pipfile" ]; then
     deactivate ;
