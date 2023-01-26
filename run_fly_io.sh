@@ -26,20 +26,6 @@ if [ "$1" = "pipfile" ]; then
     deactivate ;
     pipenv lock
 fi
-if [ "$1" = "create_app" ]; then
-    flyctl auth login
-    flyctl apps create ${FLYIO_APP_NAME}
-    flyctl secrets set TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-    flyctl secrets set SERVER_NAME=${FLYIO_APP_NAME}.fly.dev
-    flyctl secrets set OWNER=${OWNER}
-    flyctl secrets set RUN_MODE=cli
-fi
-if [ "$1" = "deploy" ]; then
-    flyctl deploy ;
-fi
-if [ "$1" = "deploy_prod" ]; then
-    flyctl deploy ;
-fi
 if [ "$1" = "clean" ]; then
     echo "Cleaning..."
     deactivate ;
@@ -50,6 +36,30 @@ if [ "$1" = "clean" ]; then
     rm -rf pyvenv.cfg ;
     ls -lah
 fi
+
+if [[ "$1" = "test" ]]; then
+    # echo "Error: no test specified" && exit 1
+    echo "Run test..."
+    python -m pytest
+    echo "Done..."
+fi
+
+if [ "$1" = "create_app" ]; then
+    flyctl auth login
+    flyctl apps create ${FLYIO_APP_NAME}
+    flyctl secrets set TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+    flyctl secrets set SERVER_NAME=${FLYIO_APP_NAME}.fly.dev
+    flyctl secrets set TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+    flyctl secrets set RUN_MODE=cli
+fi
+
+if [ "$1" = "deploy" ]; then
+    flyctl deploy ;
+fi
+if [ "$1" = "deploy_prod" ]; then
+    flyctl deploy ;
+fi
+
 if [ "$1" = "run_ngrok" ]; then
     ../node_modules/ngrok/bin/ngrok http $PORT
 fi

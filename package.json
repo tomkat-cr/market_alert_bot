@@ -4,7 +4,17 @@
   "description": "Telegram Market Alert Bot in Python",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "deactivate": "sh run_fly_io.sh deactivate",
+    "pipfile": "sh run_fly_io.sh pipfile",
+    "clean": "sh run_fly_io.sh clean",
+    "test": "sh run_fly_io.sh test",
+    "create_app": "sh run_fly_io.sh create_app",
+    "deploy": "sh run_fly_io.sh deploy_prod",
+    "run:ngrok": "sh run_fly_io.sh run_ngrok",
+    "run": "sh run_fly_io.sh run_webhook",
+    "run:dev": "sh run_fly_io.sh run",
+    "run:webhook": "sh run_fly_io.sh run_webhook",
+    "set_webhook": "sh run_fly_io.sh set_webhook"
   },
   "repository": {
     "type": "git",

@@ -1,8 +1,8 @@
 # market_alert_bot
-Telegram Market Alert Bot in Python.
-This bot shows the currency conversion of COP (Colombian Pesos) and VEB (Venezuelan Bs) to US Dollars, and any Crypto currency value in US Dollar.
+Telegram Market Alert BOT in Python.
+This BOT shows the currency conversion of COP (Colombian Pesos) and VEB (Venezuelan Bs) to US Dollars, and any Crypto currency value in US Dollar.
 
-## How to use the Bot
+## How to use the BOT
 
 - Go to Telegram and search for: `ocr_marketalert`
 - Double click on the `@ocr_marketalert_bot` entry
@@ -24,15 +24,15 @@ cd market_alert_bot
 
 ## How to deploy to fly.io
 
-Create the Bot on Telegram:
+Create the BOT on Telegram:
 
 - Go to Telegram
 - Search for: `botfather`
 - Double click on the `@botfather` entry
 - Click on the `Start` link at the bottom of the chat section.
-- Use `/newbot` command to create the bot.
-- Follow on-screen instructions to assign a bot user name, bot name, etc. Please use a different name than `@ocr_marketalert_bot` ;)
-- That the end of the process, copy the Telegram Bot Token and store it in a secure place.
+- Use `/newbot` command to create the BOT.
+- Follow on-screen instructions to assign a BOT user name, BOT name, etc. Please use a different name than `@ocr_marketalert_bot` ;)
+- That the end of the process, copy the Telegram BOT Token and store it in a secure place.
 
 Create the .env file:
 
@@ -42,8 +42,7 @@ Create the .env file:
 cp .env-example .env
 ```
 
-- Edit the `.env` file and paste the Telegram Bot Token on the 
-`TELEGRAM_BOT_TOKEN` variable.
+- Edit the `.env` file and paste the Telegram BOT Token on the `TELEGRAM_BOT_TOKEN` variable.
 
 Create the App on [Fly.io](https://fly.io) by running this command:
 
@@ -57,7 +56,10 @@ Finally deploy it running this command:
 sh run_fly_io.sh deploy
 ```
 
-## Bot local running in Polling mode
+NOTE:<br/>
+The `api/Dockerfile` has the magic to run the BOT on [Fly.io](https://fly.io). It creates a docker container with python setup, perform a `pip install` and run `python index.py`. That's the way Fly.io works.<br/><br/>
+
+## BOT local running in Polling mode
 
 Use the Polling mode when you can use a server that allow constant running of the python app.
 
@@ -73,9 +75,9 @@ Use the Polling mode when you can use a server that allow constant running of th
 sh run_fly_io.sh run
 ```
 
-## Bot local running in Webhook mode
+## BOT local running in Webhook mode
 
-Use the Webhook mode when you need to deploy the bot as a serverless function.
+Use the Webhook mode when you need to deploy the BOT as a serverless function.
 
 - Edit the `.env` file and comment this line by adding a `#` as a first character:
 
@@ -110,5 +112,5 @@ Forwarding                    https://6272-190-73-192-124.ngrok.io -> http://loc
 ```bash
 sh run_fly_io.sh run_webhook [FORWARDING_URL]
 ```
-- Go to Telegram and test your Bot.
+- Go to Telegram and test your BOT.
 - Enjoy!

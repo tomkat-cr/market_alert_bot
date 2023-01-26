@@ -17,11 +17,14 @@ logging.basicConfig(
 
 
 # https://www.alphr.com/telegram-find-user-id/
-OWNER = ''
+TELEGRAM_CHAT_ID = ''
+
+
+# BOT version
 
 
 def get_bot_version():
-    return os.environ.get('BOT_VERSION', '0.1.10')
+    return os.environ.get('BOT_VERSION', '0.1.11')
 
 
 # Debugging
@@ -36,7 +39,7 @@ def serial_ports():
     return result
 
 
-# Send telegram messages
+# Telegram error reporting
 
 
 def send_tg_message(user_id, message):
@@ -51,7 +54,7 @@ def send_tg_message(user_id, message):
 def report_error_to_tg_group(api_response):
     if not api_response['error']:
         return
-    return send_tg_message(OWNER, {
+    return send_tg_message(TELEGRAM_CHAT_ID, {
         'type': 'ERROR in a Mediabros API',
         'app_name': os.environ.get('APP_NAME', 'telegram-market-alert-bot'),
         'server_name': os.environ.get('SERVER_NAME'),
@@ -60,7 +63,7 @@ def report_error_to_tg_group(api_response):
     })
 
 
-# API functions
+# Utility functions
 
 
 def get_api_standard_response():
@@ -69,6 +72,11 @@ def get_api_standard_response():
     standard_response['error_message'] = ''
     standard_response['data'] = dict()
     return standard_response
+
+# ------------------------------------
+
+
+# Mediabros API functions
 
 
 def crypto_api(symbol, currency):
@@ -293,13 +301,16 @@ def veb_cop(currency_pair, debug):
     return response_message
 
 
+# ------------------------------------
+
+
 # Command functions
 
 
 def start(update, context):
     print('Command: /start')
     update.message.reply_text(
-        'Hello! I\'m the Mediabros Market Alert bot version '
+        'Hello! I\'m the Mediabros Market Alert BOT version '
         f'{get_bot_version()}.'
         '\nUse /help to get the command list.'
         '\nHow can I help you today baby?')
@@ -405,9 +416,9 @@ def main():
     bot_server_name = os.environ.get('SERVER_NAME', False)
     telegram_bot_token = os.environ['TELEGRAM_BOT_TOKEN']
 
-    global OWNER
-    OWNER = os.environ.get(
-        'OWNER', OWNER
+    global TELEGRAM_CHAT_ID
+    TELEGRAM_CHAT_ID = os.environ.get(
+        'TELEGRAM_CHAT_ID', TELEGRAM_CHAT_ID
     )
 
     # Updater creation
@@ -436,7 +447,7 @@ def main():
     ))
 
     # Bot init
-    print(f'Mediabros\' Market Alert bot version {bot_version}')
+    print(f'Mediabros\' Market Alert BOT version {bot_version}')
     if bot_run_mode == 'cli':
         print('Start polling...')
         updater.start_polling(timeout=1600)
