@@ -1,0 +1,28 @@
+# File: docker-compose.yml
+# 2023-01-28 | CR
+#
+version: '3'
+
+services:
+
+  market-alert-bot:
+    container_name: market-alert-bot
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9000:9000"
+    environment:
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      - APP_NAME=${APP_NAME}
+      - FLYIO_APP_NAME=${FLYIO_APP_NAME}
+      - SERVER_NAME=${SERVER_NAME}
+      - RUN_MODE=${RUN_MODE}
+      - PORT=${PORT}
+      - APIS_COMMON_SERVER_NAME=${APIS_COMMON_SERVER_NAME}
+    # volumes:
+    #   - ../api:/var/www
+
+    # Let the container keep running after bring it up
+    tty: true

@@ -34,15 +34,19 @@ if [ "$1" = "pipfile" ]; then
     pipenv lock
 fi
 if [ "$1" = "deploy" ]; then
+    cd ..
     vercel ;
 fi
 if [ "$1" = "deploy_prod" ]; then
+    cd ..
     vercel --prod ;
 fi
 if [ "$1" = "rename_staging" ]; then
+    cd ..
     vercel alias $2 ${APP_NAME}-staging-tomkat-cr.vercel.app
 fi
 if [[ "$1" = "" || "$1" = "vercel" ]]; then
+    cd ..
     vercel dev --listen 0.0.0.0:$PORT ;
 fi
 if [ "$1" = "clean" ]; then
@@ -53,6 +57,7 @@ if [ "$1" = "clean" ]; then
     rm -rf include ;
     rm -rf lib ;
     rm -rf pyvenv.cfg ;
+    rm -rf ../.vercel/cache ;
     ls -lah
 fi
 if [ "$1" = "run_ngrok" ]; then
