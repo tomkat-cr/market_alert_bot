@@ -9,6 +9,8 @@
     "clean": "sh run_fly_io.sh clean",
     "test": "sh run_fly_io.sh test",
     "create_app": "sh run_fly_io.sh create_app",
+    "set_vars": "sh run_fly_io.sh set_vars",
+    "run_docker": "sh run_fly_io.sh run_docker",
     "deploy": "sh run_fly_io.sh deploy_prod",
     "run:ngrok": "sh run_fly_io.sh run_ngrok",
     "run": "sh run_fly_io.sh run_webhook",

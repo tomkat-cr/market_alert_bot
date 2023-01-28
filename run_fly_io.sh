@@ -47,6 +47,9 @@ fi
 if [ "$1" = "create_app" ]; then
     flyctl auth login
     flyctl apps create ${FLYIO_APP_NAME}
+fi
+
+if [[ "$1" = "create_app" || "$1" = "set_vars" ]]; then
     flyctl secrets set TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
     flyctl secrets set TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
     flyctl secrets set SERVER_NAME=${FLYIO_APP_NAME}.fly.dev

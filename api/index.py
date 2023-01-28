@@ -22,7 +22,7 @@ logging.basicConfig(
 
 
 def get_bot_version():
-    return os.environ.get('BOT_VERSION', '0.1.11')
+    return os.environ.get('BOT_VERSION', '0.1.12')
 
 
 # ------------------------------------
