@@ -57,6 +57,10 @@ if [[ "$1" = "create_app" || "$1" = "set_vars" ]]; then
     flyctl secrets set APIS_COMMON_SERVER_NAME=https://mediabros-apis.vercel.app
 fi
 
+if [ "$1" = "restart" ]; then
+    flyctl apps restart ${FLYIO_APP_NAME} ;
+fi
+
 if [ "$1" = "deploy" ]; then
     flyctl deploy ;
 fi
