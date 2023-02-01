@@ -1,16 +1,14 @@
 import logging
 import os
-# import requests
-# import datetime
 
 from telegram.ext import Updater, CommandHandler
 from a2wsgi import ASGIMiddleware
 
-from .general_utilities import serial_ports
+from .utility_telegram import get_command_params, get_updates_debug
+from .utility_general import serial_ports, log_endpoint_debug, log_normal
 from .settings import settings
-from .general_utilities import get_api_standard_response
-from .ext_api_processing import usdcop, usdveb, veb_cop, crypto, openai_api
-
+from .utility_auth import get_user_authentication, login_handler
+from .api_processing import usdcop, usdveb, veb_cop, crypto, openai_api
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -22,7 +20,7 @@ logging.basicConfig(
 
 
 def get_bot_version():
-    return os.environ.get('BOT_VERSION', '0.1.12')
+    return os.environ.get('BOT_VERSION', '0.1.14')
 
 
 # ------------------------------------
@@ -32,7 +30,7 @@ def get_bot_version():
 
 
 def start(update, context):
-    print('Command: /start')
+    log_endpoint_debug('Command: /start')
     update.message.reply_text(
         'Hello! I\'m the Mediabros Market Alert BOT version '
         f'{get_bot_version()}.'
@@ -41,7 +39,7 @@ def start(update, context):
 
 
 def help(update, context):
-    print('Command: /help')
+    log_endpoint_debug('Command: /help')
     update.message.reply_text(
         'Command Help:\n\n'
         '/help = get this documentation.\n'
@@ -72,52 +70,6 @@ def help(update, context):
         ' raw responses.'
         '\n'
     )
-
-
-def get_updates_debug(update, context):
-    response = f'Update:\n{update}\nContext:\n{context}'
-    update.message.reply_text(response)
-
-
-def get_command_params(update, context):
-    response = get_api_standard_response()
-    del response['data']
-
-    # Get user's command
-
-    try:
-        response['text'] = update['message']['text']
-    except Exception as err:
-        response['error'] = True
-        response['error_message'] = \
-            f'ERROR: Cannot retrieve the "text" element from Update.\n[{err}]'
-        return response
-
-    if response['text'] is None:
-        response['error'] = True
-        response['error_message'] = 'ERROR: no text supplied.'
-        return response
-
-    try:
-        response['command'] = response['text'].split(' ')[0]
-    except Exception as err:
-        response['error'] = True
-        response['error_message'] = \
-            f'ERROR: command cannot be fetched.\n[{err}]'
-        return response
-
-    # Get user's parameters
-
-    response['par'] = [
-        context.args[i] for i in range(0, len(context.args))
-    ]
-
-    # Debug flag shows the raw responses
-    response['debug'] = ('/debug' in response['par'])
-    if response['debug']:
-        response['par'].remove('/debug')
-
-    return response
 
 
 def currency_exchange(update, context):
@@ -151,7 +103,7 @@ def currency_exchange(update, context):
             pass
         cmd_par['par'].remove(cmd_par['par'][0])
 
-    print(
+    log_endpoint_debug(
         f"Command: {cmd_par['text']} |" +
         f" {currency_pair} {amount} {cmd_par['debug']}"
     )
@@ -198,7 +150,7 @@ def crypto_exchange(update, context):
             pass
         cmd_par['par'].remove(cmd_par['par'][0])
 
-    print(
+    log_endpoint_debug(
         f"Command: {cmd_par['command']} {crypto_symbol}" +
         f" {currency} {amount} {cmd_par['debug']}"
     )
@@ -217,11 +169,18 @@ def ai_commands_handler(update, context):
     if cmd_par['error']:
         update.message.reply_text(cmd_par['error_message'])
         return
-
+    auth_data = get_user_authentication(cmd_par)
+    if not auth_data['found'] or auth_data['error']:
+        update.message.reply_text(auth_data['error_message'])
+        return
     other_param = ' '.join(cmd_par['par'])
     update.message.reply_text(
         openai_api(
-            cmd_par['command'], other_param, cmd_par['debug']
+            cmd_par['command'],
+            other_param,
+            cmd_par['debug'],
+            auth_data['userdata'],
+            auth_data['headers']
         )
     )
 
@@ -272,32 +231,35 @@ def main():
         CommandHandler('codex', ai_commands_handler)
     )
 
+    # /login
+    updater.dispatcher.add_handler(CommandHandler('login', login_handler))
+
     # /get_updates command
     updater.dispatcher.add_handler(CommandHandler(
         'get_updates', get_updates_debug
     ))
 
     # Bot init
-    print(f'Mediabros\' Market Alert BOT version {bot_version}')
+    log_normal(f'Mediabros\' Market Alert BOT version {bot_version}')
     if bot_run_mode == 'cli':
-        print('Start polling...')
+        log_normal('Start polling...')
         updater.start_polling(timeout=1600)
     else:
-        print('Webhook mode...')
-        print(f'bot_server_name [webhook_url]: {bot_server_name}')
-        print(f'Listen to: {bot_listen_addr}:{bot_port}')
+        log_normal('Webhook mode...')
+        log_normal(f'bot_server_name [webhook_url]: {bot_server_name}')
+        log_normal(f'Listen to: {bot_listen_addr}:{bot_port}')
         if not bot_server_name:
             raise Exception("ERROR: Server Name variable not set")
-        print('Starting webhook...')
+        log_normal('Starting webhook...')
         webhook = updater.bot.get_webhook_info()
-        print(updater.bot.get_me())
-        print(webhook)
+        log_normal(updater.bot.get_me())
+        log_normal(webhook)
         if webhook.url:
-            print('delete_webhook...')
+            log_normal('delete_webhook...')
             updater.bot.delete_webhook()
             webhook = updater.bot.get_webhook_info()
         if not webhook.url:
-            print('start_webhook...')
+            log_normal('start_webhook...')
             updater.start_webhook(
                 listen=bot_listen_addr,
                 port=int(bot_port),
@@ -305,10 +267,10 @@ def main():
                 drop_pending_updates=True,
             )
 
-    print('Ports report...')
-    print(serial_ports())
+    log_normal('Ports report...')
+    log_normal(serial_ports())
 
-    print(f'[{bot_run_mode}] Wait for requests...')
+    log_normal(f'[{bot_run_mode}] Wait for requests...')
     updater.idle()
 
     if bot_run_mode == 'cli':

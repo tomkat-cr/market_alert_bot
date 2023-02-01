@@ -26,6 +26,10 @@ if [[ "$1" != "deactivate" && "$1" != "pipfile" && "$1" != "clean" && "$1" != "s
         pip install python-telegram-bot
         pip install pyserial
         pip install a2wsgi
+        pip install requests-toolbelt
+        pip install pymongo
+        pip install pydantic
+        pip install werkzeug
         pip freeze > requirements.txt
     fi
 fi
@@ -64,11 +68,12 @@ if [ "$1" = "run_ngrok" ]; then
     ../node_modules/ngrok/bin/ngrok http $PORT
 fi
 if [ "$1" = "run_webhook" ]; then
+    cd ..
     if [ "$2" != "" ]; then
         SERVER_NAME=$2
-        sh ../run_vercel.sh set_webhook $2
+        sh run_vercel.sh set_webhook $2
     fi
-    python index.py
+    python -m ${APP_DIR}.index.py
 fi
 if [ "$1" = "set_webhook" ]; then
     # curl -X POST https://api.telegram.org/bot<YOUR-BOT-TOKEN>/setWebhook -H "Content-type: application/json" -d '{"url": "https://project-name.username.vercel.app/api/webhook"}'

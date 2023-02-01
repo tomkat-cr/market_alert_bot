@@ -20,7 +20,18 @@ if [[ "$1" != "deactivate" && "$1" != "pipfile" && "$1" != "clean" && "$1" != "s
     python3 -m venv ${APP_DIR} ;
     . ${APP_DIR}/bin/activate ;
     cd ${APP_DIR} ;
-    pip3 install -r requirements.txt ;
+    if [ -f "requirements.txt" ]; then
+        pip3 install -r requirements.txt
+    else
+        pip install python-telegram-bot
+        pip install pyserial
+        pip install a2wsgi
+        pip install requests-toolbelt
+        pip install pymongo
+        pip install pydantic
+        pip install werkzeug
+        pip freeze > requirements.txt
+    fi
 fi
 if [ "$1" = "pipfile" ]; then
     deactivate ;
@@ -34,6 +45,7 @@ if [ "$1" = "clean" ]; then
     rm -rf include ;
     rm -rf lib ;
     rm -rf pyvenv.cfg ;
+    rm -rf ../.vercel/cache ;
     ls -lah
 fi
 
@@ -55,6 +67,8 @@ if [[ "$1" = "create_app" || "$1" = "set_vars" ]]; then
     flyctl secrets set SERVER_NAME=${FLYIO_APP_NAME}.fly.dev
     flyctl secrets set RUN_MODE=cli
     flyctl secrets set APIS_COMMON_SERVER_NAME=https://mediabros-apis.vercel.app
+    flyctl secrets set DB_URI=${DB_URI}
+    flyctl secrets set DB_NAME=${DB_NAME}
 fi
 
 if [ "$1" = "restart" ]; then
