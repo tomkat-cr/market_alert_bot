@@ -83,7 +83,7 @@ def get_command_params(update, context):
         return response
 
     try:
-        response['command'] = response['text'].split(' ')[0]
+        response['command'] = response['text'].split(' ')[0].lower()
     except Exception as err:
         response['error'] = True
         response['error_message'] = \

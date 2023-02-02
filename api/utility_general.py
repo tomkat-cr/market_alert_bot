@@ -108,13 +108,23 @@ def get_standard_base_exception_msg(err, message_code='NO_E_CODE'):
 
 def generic_api_call(url, api_name, post_data=None, headers=None):
     api_response = generic_api_call_raw(url, api_name, post_data, headers)
+    if 'data' in api_response and \
+       'error' in api_response and \
+       'error_message' in api_response:
+        if not api_response['error']:
+            return str(api_response['data'])
     return str(api_response)
 
 
 def generic_api_call_raw(
     url, api_name, post_data=None, headers=None, body=None
 ):
-    print('generic_api_call', url, api_name, post_data, headers)
+    log_endpoint_debug(f'>>--> GENERIC_API_CALL: {api_name}')
+    log_normal('-------------')
+    log_normal(f'URL: {url}')
+    log_normal(f'post_data: {post_data}')
+    log_normal(f'headers: {headers}')
+
     api_response = get_api_standard_response()
     api_response['response.status_code'] = None
     api_response['response.text'] = None
@@ -167,5 +177,6 @@ def generic_api_call_raw(
             api_response['error_message'] = 'ERROR reading ' + \
                 f'{api_name} API.' + \
                 f' Status: {response.status_code}, Text: {response.text}'
-    print(f'API call RESPONSE: {api_response}')
+    log_normal('-------------')
+    log_normal(f'API call RESPONSE: {api_response}')
     return api_response
