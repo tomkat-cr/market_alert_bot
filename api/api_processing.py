@@ -14,7 +14,7 @@ def crypto(symbol, currency, debug):
     currency = currency.upper()
     symbol = symbol.upper()
     url = settings.APIS_COMMON_SERVER_NAME + \
-        f'/crypto/{symbol}/{currency}/{str(debug)}'
+        f'/crypto_wc/{symbol}/{currency}/{str(debug)}'
     return generic_api_call(url, 'Crypto Currency Exchange')
 
 

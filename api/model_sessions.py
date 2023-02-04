@@ -1,6 +1,3 @@
-# from datetime import timedelta
-from typing import Union
-
 from pydantic import BaseModel
 from bson.json_util import ObjectId
 
@@ -48,7 +45,8 @@ def create_session(json):
 
     db_row = fetch_session_by_entryname('username', json['username'])
     if db_row['resultset']:
-        resultset['error_message'] = 'Session for user {} already exists [CS4].'.format(json['username'])
+        resultset['error_message'] = \
+            f"Session for user {json['username']} already exists [CS4]."
     elif db_row['error']:
         resultset['error_message'] = db_row['error_message']
 
@@ -56,14 +54,17 @@ def create_session(json):
         resultset['error'] = True
         return resultset
 
-    # json['creation_date'] = json['update_date'] = current_datetime_timestamp()
+    # json['creation_date'] = \
+    #   json['update_date'] = current_datetime_timestamp()
 
     try:
         resultset['resultset']['_id'] = str(
             db.sessions.insert_one(json).inserted_id
         )
     except BaseException as err:
-        resultset['error_message'] = get_standard_base_exception_msg(err, 'CS5')
+        resultset['error_message'] = get_standard_base_exception_msg(
+            err, 'CS5'
+        )
         resultset['error'] = True
     else:
         resultset['resultset']['rows_affected'] = '1'

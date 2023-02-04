@@ -92,7 +92,7 @@ fi
 if [ "$1" = "run" ]; then
     # python index.py
     cd ..
-    python -m api.index
+    python -m ${APP_DIR}.index
 fi
 if [ "$1" = "run_webhook" ]; then
     if [ "$2" != "" ]; then
@@ -101,7 +101,7 @@ if [ "$1" = "run_webhook" ]; then
     fi
     # python index.py
     cd ..
-    python -m api.index
+    python -m ${APP_DIR}.index
 fi
 if [ "$1" = "set_webhook" ]; then
     # curl -X POST https://api.telegram.org/bot<YOUR-BOT-TOKEN>/setWebhook -H "Content-type: application/json" -d '{"url": "https://project-name.username.vercel.app/api/webhook"}'

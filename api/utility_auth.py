@@ -1,6 +1,7 @@
 import json
 from .settings import settings
-from .utility_telegram import get_command_params, tg_delete_message, tg_send_message
+from .utility_telegram import get_command_params, tg_delete_message, \
+    tg_send_message
 from .utility_general import generic_api_call_raw, \
     get_api_standard_response, log_debug
 from .model_sessions import get_session, create_session, update_session
@@ -82,12 +83,6 @@ def login_handler(update, context):
         update.message.reply_text(session_data['error'])
         return
     if session_data['found']:
-        # ?????
-        # AttributeError: 'Session' object has no attribute '_id'
-        # login_handler.session_data: {'error': False, 'error_message': None, 'resultset': {'_id': ObjectId('63d723d58499ee8663e78ebd'), 'username': 'tomkat_cr', 'token': 'xxxx'}, 'found': True, 'data': Session(username='tomkat_cr', token='xxxx')}
-        # ?????
-        # session_row['_id'] = session_data['data']._id
-        # ?????
         session_row['_id'] = get_id_as_str(session_data['resultset'])
         response = update_session(session_row)
         log_debug(f'** login_handler.update_session.response: {response}')

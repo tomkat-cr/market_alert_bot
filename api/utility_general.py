@@ -168,14 +168,26 @@ def generic_api_call_raw(
         api_response['response.status_code'] = response.status_code
         api_response['response.text'] = response.text
         if response.status_code == 200:
+            log_debug(
+                '$$$ API call RAW RESPONSE:' +
+                f' status={response.status_code}, text={response.text}'
+            )
             if 'error' not in response and 'data' not in response:
-                api_response['data'] = response.json()
+                try:
+                    api_response['data'] = response.json()
+                except requests.exceptions.JSONDecodeError:
+                    api_response['data'] = response.text
+                except Exception as err:
+                    api_response['error'] = True
+                    api_response['error_message'] = 'ERROR reading ' + \
+                        f'{api_name} API response.' + \
+                        f' Status: {response.status_code}, Error: {err}'
             else:
                 api_response = response.json()
         else:
             api_response['error'] = True
-            api_response['error_message'] = 'ERROR reading ' + \
-                f'{api_name} API.' + \
+            api_response['error_message'] = \
+                f'ERROR reading {api_name} API.' + \
                 f' Status: {response.status_code}, Text: {response.text}'
     log_normal('-------------')
     log_normal(f'API call RESPONSE: {api_response}')
