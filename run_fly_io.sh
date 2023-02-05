@@ -62,12 +62,19 @@ if [ "$1" = "create_app" ]; then
 fi
 
 if [[ "$1" = "create_app" || "$1" = "set_vars" ]]; then
+    echo "Setting: TELEGRAM_BOT_TOKEN = *****"
     flyctl secrets set TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+    echo "Setting: TELEGRAM_CHAT_ID = ${TELEGRAM_CHAT_ID}"
     flyctl secrets set TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+    echo "Setting: SERVER_NAME = ${SERVER_NAME}"
     flyctl secrets set SERVER_NAME=${FLYIO_APP_NAME}.fly.dev
+    echo "Setting: RUN_MODE = cli"
     flyctl secrets set RUN_MODE=cli
-    flyctl secrets set APIS_COMMON_SERVER_NAME=https://mediabros-apis.vercel.app
+    echo "Setting: APIS_COMMON_SERVER_NAME = ${APIS_COMMON_SERVER_NAME}"
+    flyctl secrets set APIS_COMMON_SERVER_NAME=${APIS_COMMON_SERVER_NAME}
+    echo "Setting: DB_URI = *******"
     flyctl secrets set DB_URI=${DB_URI}
+    echo "Setting: DB_NAME = ${DB_NAME}"
     flyctl secrets set DB_NAME=${DB_NAME}
 fi
 
