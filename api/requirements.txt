@@ -13,7 +13,7 @@ mccabe==0.7.0
 pycodestyle==2.10.0
 pydantic==1.10.4
 pyflakes==3.0.1
-pymongo==4.3.3
+pymongo==4.6.3
 pyserial==3.5
 python-telegram-bot==13.15
 pytz==2022.7
