@@ -6,7 +6,7 @@ charset-normalizer==2.1.1
 dnspython==2.3.0
 flake8==6.0.0
 future==0.18.2
-idna==3.4
+idna==3.7
 iso8601==1.1.0
 MarkupSafe==2.1.2
 mccabe==0.7.0
