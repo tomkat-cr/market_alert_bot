@@ -2,44 +2,18 @@
 # run_fly_io.sh
 # 2022-12-31 | CR
 #
-APP_DIR='api'
-if [ -f "./.env" ]; then
-    ENV_FILESPEC="./.env"
-else
-    ENV_FILESPEC="../.env"
-fi
-set -o allexport; source ${ENV_FILESPEC}; set +o allexport ;
-if [ "$PORT" = "" ]; then
-    PORT="8000"
-fi
-if [ "$1" = "deactivate" ]; then
+
+run_deactivate() {
     cd ${APP_DIR} ;
     deactivate ;
-fi
-if [[ "$1" != "deactivate" && "$1" != "pipfile" && "$1" != "clean" && "$1" != "set_webhook" ]]; then
-    python3 -m venv ${APP_DIR} ;
-    . ${APP_DIR}/bin/activate ;
-    cd ${APP_DIR} ;
-    if [ -f "requirements.txt" ]; then
-        pip3 install -r requirements.txt
-    else
-        pip install python-telegram-bot
-        pip install pyserial
-        pip install a2wsgi
-        pip install requests-toolbelt
-        pip install pymongo
-        pip install pydantic
-        pip install werkzeug
-        pip freeze > requirements.txt
-    fi
-fi
-if [ "$1" = "pipfile" ]; then
-    deactivate ;
-    pipenv lock
-fi
-if [ "$1" = "clean" ]; then
+    cd ..
+}
+
+run_clean() {
+    cd "${APP_DIR}"
+    pwd
     echo "Cleaning..."
-    deactivate ;
+    # deactivate ;
     rm -rf __pycache__ ;
     rm -rf bin ;
     rm -rf include ;
@@ -47,6 +21,72 @@ if [ "$1" = "clean" ]; then
     rm -rf pyvenv.cfg ;
     rm -rf ../.vercel/cache ;
     ls -lah
+    cd ..
+}
+
+run_fresh_install() {
+    pip install python-telegram-bot
+    pip install pyserial
+    pip install a2wsgi
+    pip install requests-toolbelt
+    pip install pymongo
+    pip install pydantic
+    pip install werkzeug
+    pip install setuptools
+    pip freeze > requirements.txt
+    # Add setuptools to requirements.txt if not already there
+    if ! grep -q "setuptools" requirements.txt; then
+        echo "setuptools>=70.0.0 # not directly required, pinned by Snyk to avoid a vulnerability" >> requirements.txt
+    fi
+}
+
+run_venv() {
+    pwd
+    python3 -m venv ${APP_DIR} ;
+    . ${APP_DIR}/bin/activate ;
+    cd ${APP_DIR} ;
+    if [ -f "requirements.txt" ]; then
+        pip3 install -r requirements.txt
+    else
+        run_fresh_install
+    fi
+}
+
+APP_DIR='api'
+if [ -f "./.env" ]; then
+    ENV_FILESPEC="./.env"
+else
+    ENV_FILESPEC="../.env"
+fi
+
+set -o allexport; source ${ENV_FILESPEC}; set +o allexport ;
+
+if [ "$PORT" = "" ]; then
+    PORT="8000"
+fi
+
+if [ "$1" = "deactivate" ]; then
+    run_deactivate
+fi
+
+if [[ "$1" != "deactivate" && "$1" != "pipfile" && "$1" != "clean" && "$1" != "set_webhook" && "$1" != "update" ]]; then
+    run_venv
+fi
+
+if [ "$1" = "pipfile" ]; then
+    # deactivate ;
+    pipenv lock
+fi
+
+if [ "$1" = "clean" ]; then
+    run_clean
+fi
+
+if [ "$1" = "update" ]; then
+    rm "${APP_DIR}/requirements.txt"
+    run_clean
+    run_venv
+    run_deactivate
 fi
 
 if [[ "$1" = "test" ]]; then
@@ -85,6 +125,7 @@ fi
 if [ "$1" = "deploy" ]; then
     flyctl deploy ;
 fi
+
 if [ "$1" = "deploy_prod" ]; then
     flyctl deploy ;
 fi
@@ -96,11 +137,13 @@ fi
 if [ "$1" = "run_ngrok" ]; then
     ../node_modules/ngrok/bin/ngrok http $PORT
 fi
+
 if [ "$1" = "run" ]; then
     # python index.py
     cd ..
     python -m ${APP_DIR}.index
 fi
+
 if [ "$1" = "run_webhook" ]; then
     if [ "$2" != "" ]; then
         SERVER_NAME=$2
@@ -110,6 +153,7 @@ if [ "$1" = "run_webhook" ]; then
     cd ..
     python -m ${APP_DIR}.index
 fi
+
 if [ "$1" = "set_webhook" ]; then
     # curl -X POST https://api.telegram.org/bot<YOUR-BOT-TOKEN>/setWebhook -H "Content-type: application/json" -d '{"url": "https://project-name.username.vercel.app/api/webhook"}'
     BOT_URL="https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}"
