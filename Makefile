@@ -21,10 +21,10 @@ restart:
 	${SHELL} ./run_fly_io.sh restart
 
 run_docker:
-	${SHELL} ./run_fly_io.sh ./run_docker
+	${SHELL} ./run_fly_io.sh run_docker
 
 run_webhook:
-	${SHELL} ./run_fly_io.sh ./run_webhook
+	${SHELL} ./run_fly_io.sh run_webhook
 
 set_webhook:
 	${SHELL} ./run_fly_io.sh set_webhook
@@ -36,7 +36,7 @@ set_vars:
 	${SHELL} ./run_fly_io.sh set_vars
 
 run_ngrok:
-	${SHELL} ./run_fly_io.sh ./run_ngrok
+	${SHELL} ./run_fly_io.sh run_ngrok
 
 run:
-	${SHELL} ./run_fly_io.sh ./run
+	${SHELL} ./run_fly_io.sh run

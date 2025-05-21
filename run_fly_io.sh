@@ -135,7 +135,8 @@ if [ "$1" = "run_docker" ]; then
 fi
 
 if [ "$1" = "run_ngrok" ]; then
-    ../node_modules/ngrok/bin/ngrok http $PORT
+    # ../node_modules/ngrok/bin/ngrok http $PORT
+    npx ngrok http $PORT
 fi
 
 if [ "$1" = "run" ]; then
