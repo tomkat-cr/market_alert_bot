@@ -26,11 +26,15 @@ CHANGELOG file added with commit history up to v1.0.1
 Makefile file added
 run_fly_io.sh: update option added to update requirements.txt and venv
 
+### Changes
+Update telegram bot api calling to the latest version.
+
 ### Fixes
 requirements.txt updated to solve snyk vulnerabilities
 run_fly_io.sh: clean change dir to api before running
 Fix "run_docker" and "run_webhook"Makefile entries with the correct execution parameter for "./run_fly_io.sh".
 Fix "run_ngrok" replacing "./node_modules/ngrok/bin/ngrok..." with "npx ngrok http $PORT".
+
 
 ## 1.0.0 (2023-02-05)
 ---

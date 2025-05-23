@@ -1,8 +1,9 @@
 import logging
 import os
 
-from telegram.ext import Updater, CommandHandler
-from a2wsgi import ASGIMiddleware
+from telegram import Update
+from telegram.ext import Application, CommandHandler
+# from a2wsgi import ASGIMiddleware
 
 from .utility_telegram import get_command_params, get_updates_debug
 from .utility_general import serial_ports, log_endpoint_debug, log_normal
@@ -29,18 +30,18 @@ def get_bot_version():
 # Command functions
 
 
-def start(update, context):
+async def start(update, context):
     log_endpoint_debug('Command: /start')
-    update.message.reply_text(
+    await update.message.reply_text(
         'Hello! I\'m the Mediabros Market Alert BOT version '
         f'{get_bot_version()}.'
         '\nUse /help to get the command list.'
         '\nHow can I help you today baby?')
 
 
-def help(update, context):
+async def help(update, context):
     log_endpoint_debug('Command: /help')
-    update.message.reply_text(
+    await update.message.reply_text(
         'Command Help:\n\n'
         '/help = get this documentation.\n'
         '\n'
@@ -72,10 +73,10 @@ def help(update, context):
     )
 
 
-def currency_exchange(update, context):
+async def currency_exchange(update, context):
     cmd_par = get_command_params(update, context)
     if cmd_par['error']:
-        update.message.reply_text(cmd_par['error_message'])
+        await update.message.reply_text(cmd_par['error_message'])
         return
 
     currency_pair = ''
@@ -122,13 +123,13 @@ def currency_exchange(update, context):
     else:
         # If invalid or missing currency pair code, report the error
         response_message = 'Please specify a valid currency pair.'
-    update.message.reply_text(response_message)
+    await update.message.reply_text(response_message)
 
 
-def crypto_exchange(update, context):
+async def crypto_exchange(update, context):
     cmd_par = get_command_params(update, context)
     if cmd_par['error']:
-        update.message.reply_text(cmd_par['error_message'])
+        await update.message.reply_text(cmd_par['error_message'])
         return
 
     crypto_symbol = ''
@@ -161,20 +162,20 @@ def crypto_exchange(update, context):
     else:
         # If invalid or missing crypto symbol, report the error
         response_message = 'Please specify the crypto currency symbol.'
-    update.message.reply_text(response_message)
+    await update.message.reply_text(response_message)
 
 
-def ai_commands_handler(update, context):
+async def ai_commands_handler(update, context):
     cmd_par = get_command_params(update, context)
     if cmd_par['error']:
-        update.message.reply_text(cmd_par['error_message'])
+        await update.message.reply_text(cmd_par['error_message'])
         return
     auth_data = get_user_authentication(cmd_par)
     if not auth_data['found'] or auth_data['error']:
-        update.message.reply_text(auth_data['error_message'])
+        await update.message.reply_text(auth_data['error_message'])
         return
     other_param = ' '.join(cmd_par['par'])
-    update.message.reply_text(
+    await update.message.reply_text(
         openai_api(
             cmd_par['command'],
             other_param,
@@ -195,88 +196,92 @@ def main():
     bot_server_name = settings.SERVER_NAME
     telegram_bot_token = settings.TELEGRAM_BOT_TOKEN
 
-    # Updater creation
-    updater = Updater(telegram_bot_token, use_context=True)
+    # Updater creationx
+    application = Application.builder().token(telegram_bot_token).build()
 
     # /start command
-    updater.dispatcher.add_handler(CommandHandler('start', start))
+    application.add_handler(CommandHandler('start', start))
 
     # /help command
-    updater.dispatcher.add_handler(CommandHandler('help', help))
+    application.add_handler(CommandHandler('help', help))
 
     # /currency command
-    updater.dispatcher.add_handler(
+    application.add_handler(
         CommandHandler('currency', currency_exchange)
     )
 
     # /cur command
-    updater.dispatcher.add_handler(CommandHandler('cur', currency_exchange))
+    application.add_handler(CommandHandler('cur', currency_exchange))
 
     # Currency shortcuts
-    updater.dispatcher.add_handler(CommandHandler('bs', currency_exchange))
-    updater.dispatcher.add_handler(CommandHandler('cop', currency_exchange))
-    updater.dispatcher.add_handler(CommandHandler('vebcop', currency_exchange))
-    updater.dispatcher.add_handler(CommandHandler('copveb', currency_exchange))
-    updater.dispatcher.add_handler(CommandHandler('btc', currency_exchange))
-    updater.dispatcher.add_handler(CommandHandler('eth', currency_exchange))
+    application.add_handler(CommandHandler('bs', currency_exchange))
+    application.add_handler(CommandHandler('cop', currency_exchange))
+    application.add_handler(CommandHandler('vebcop', currency_exchange))
+    application.add_handler(CommandHandler('copveb', currency_exchange))
+    application.add_handler(CommandHandler('btc', currency_exchange))
+    application.add_handler(CommandHandler('eth', currency_exchange))
 
     # /crypto command
-    updater.dispatcher.add_handler(CommandHandler('crypto', crypto_exchange))
+    application.add_handler(CommandHandler('crypto', crypto_exchange))
 
     # /ai & /codex commands
-    updater.dispatcher.add_handler(
+    application.add_handler(
         CommandHandler('ai', ai_commands_handler)
     )
-    updater.dispatcher.add_handler(
+    application.add_handler(
         CommandHandler('codex', ai_commands_handler)
     )
 
     # /login
-    updater.dispatcher.add_handler(CommandHandler('login', login_handler))
+    application.add_handler(CommandHandler('login', login_handler))
 
     # /get_updates command
-    updater.dispatcher.add_handler(CommandHandler(
+    application.add_handler(CommandHandler(
         'get_updates', get_updates_debug
     ))
 
     # Bot init
     log_normal(f'Mediabros\' Market Alert BOT version {bot_version}')
-    if bot_run_mode == 'cli':
-        log_normal('Start polling...')
-        updater.start_polling(timeout=1600)
-    else:
-        log_normal('Webhook mode...')
-        log_normal(f'bot_server_name [webhook_url]: {bot_server_name}')
-        log_normal(f'Listen to: {bot_listen_addr}:{bot_port}')
-        if not bot_server_name:
-            raise Exception("ERROR: Server Name variable not set")
-        log_normal('Starting webhook...')
-        webhook = updater.bot.get_webhook_info()
-        log_normal(updater.bot.get_me())
-        log_normal(webhook)
-        if webhook.url:
-            log_normal('delete_webhook...')
-            updater.bot.delete_webhook()
-            webhook = updater.bot.get_webhook_info()
-        if not webhook.url:
-            log_normal('start_webhook...')
-            updater.start_webhook(
-                listen=bot_listen_addr,
-                port=int(bot_port),
-                webhook_url=f'{bot_server_name}',
-                drop_pending_updates=True,
-            )
+    log_normal('Start polling...')
+    application.run_polling(allowed_updates=Update.ALL_TYPES)
+
+    # if bot_run_mode == 'cli':
+    #     log_normal('Start polling...')
+    #     application.run_polling()
+    # else:
+    #     log_normal('Webhook mode...')
+    #     log_normal(f'bot_server_name [webhook_url]: {bot_server_name}')
+    #     log_normal(f'Listen to: {bot_listen_addr}:{bot_port}')
+    #     if not bot_server_name:
+    #         raise Exception("ERROR: Server Name variable not set")
+    #     log_normal('Starting webhook...')
+    #     webhook = application.get_webhook_info()
+    #     log_normal(application.get_me())
+    #     log_normal(webhook)
+    #     if webhook.url:
+    #         log_normal('delete_webhook...')
+    #         application.delete_webhook()
+    #         webhook = application.get_webhook_info()
+    #     if not webhook.url:
+    #         log_normal('start_webhook...')
+    #         application.start_webhook(
+    #             listen=bot_listen_addr,
+    #             port=int(bot_port),
+    #             webhook_url=f'{bot_server_name}',
+    #             drop_pending_updates=True,
+    #         )
 
     log_normal('Ports report...')
     log_normal(serial_ports())
 
     log_normal(f'[{bot_run_mode}] Wait for requests...')
-    updater.idle()
+    # application.idle()
 
-    if bot_run_mode == 'cli':
-        return updater
-    else:
-        return ASGIMiddleware(updater)
+    return application
+    # if bot_run_mode == 'cli':
+    #     return application
+    # else:
+    #     return ASGIMiddleware(application)
 
 
 handler = main()

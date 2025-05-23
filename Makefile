@@ -1,9 +1,13 @@
-.PHONY: deactivate pipfile clean update restart run_docker run_webhook set_webhook create_app set_vars run_ngrok run
+.PHONY: install deploy deploy_prod deactivate pipfile clean update restart run_docker run_webhook set_webhook create_app set_vars run_ngrok run
 SHELL := /bin/bash
 
 # default show this file
 all:
 	@cat Makefile
+
+install:
+	# https://github.com/superfly/flyctl
+	brew install flyctl
 
 deactivate:
 	${SHELL} ./run_fly_io.sh deactivate
@@ -40,3 +44,8 @@ run_ngrok:
 
 run:
 	${SHELL} ./run_fly_io.sh run
+
+deploy_prod:
+	${SHELL} ./run_fly_io.sh deploy_prod
+
+deploy: deploy_prod

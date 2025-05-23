@@ -4,8 +4,8 @@
 #
 
 run_deactivate() {
-    cd ${APP_DIR} ;
-    deactivate ;
+    cd "${APP_DIR}"
+    deactivate
     cd ..
 }
 
@@ -69,9 +69,9 @@ if [ "$1" = "deactivate" ]; then
     run_deactivate
 fi
 
-if [[ "$1" != "deactivate" && "$1" != "pipfile" && "$1" != "clean" && "$1" != "set_webhook" && "$1" != "update" ]]; then
-    run_venv
-fi
+# if [[ "$1" != "deactivate" && "$1" != "pipfile" && "$1" != "clean" && "$1" != "set_webhook" && "$1" != "update" ]]; then
+#     run_venv
+# fi
 
 if [ "$1" = "pipfile" ]; then
     # deactivate ;
@@ -91,17 +91,22 @@ fi
 
 if [[ "$1" = "test" ]]; then
     # echo "Error: no test specified" && exit 1
+    run_venv
     echo "Run test..."
     python -m pytest
     echo "Done..."
 fi
 
 if [ "$1" = "create_app" ]; then
+    cd "${APP_DIR}"
     flyctl auth login
     flyctl apps create ${FLYIO_APP_NAME}
 fi
 
 if [[ "$1" = "create_app" || "$1" = "set_vars" ]]; then
+    cd "${APP_DIR}"
+    echo "Setting: APIS_COMMON_SERVER_NAME = ${APIS_COMMON_SERVER_NAME}"
+    flyctl secrets set APIS_COMMON_SERVER_NAME=${APIS_COMMON_SERVER_NAME}
     echo "Setting: TELEGRAM_BOT_TOKEN = *****"
     flyctl secrets set TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
     echo "Setting: TELEGRAM_CHAT_ID = ${TELEGRAM_CHAT_ID}"
@@ -110,8 +115,6 @@ if [[ "$1" = "create_app" || "$1" = "set_vars" ]]; then
     flyctl secrets set SERVER_NAME=${FLYIO_APP_NAME}.fly.dev
     echo "Setting: RUN_MODE = cli"
     flyctl secrets set RUN_MODE=cli
-    echo "Setting: APIS_COMMON_SERVER_NAME = ${APIS_COMMON_SERVER_NAME}"
-    flyctl secrets set APIS_COMMON_SERVER_NAME=${APIS_COMMON_SERVER_NAME}
     echo "Setting: DB_URI = *******"
     flyctl secrets set DB_URI=${DB_URI}
     echo "Setting: DB_NAME = ${DB_NAME}"
@@ -119,18 +122,22 @@ if [[ "$1" = "create_app" || "$1" = "set_vars" ]]; then
 fi
 
 if [ "$1" = "restart" ]; then
+    cd "${APP_DIR}"
     flyctl apps restart ${FLYIO_APP_NAME} ;
 fi
 
 if [ "$1" = "deploy" ]; then
+    run_venv
     flyctl deploy ;
 fi
 
 if [ "$1" = "deploy_prod" ]; then
+    run_venv
     flyctl deploy ;
 fi
 
 if [ "$1" = "run_docker" ]; then
+    cd "${APP_DIR}"
     docker-compose up -d
 fi
 
@@ -140,7 +147,7 @@ if [ "$1" = "run_ngrok" ]; then
 fi
 
 if [ "$1" = "run" ]; then
-    # python index.py
+    run_venv
     cd ..
     python -m ${APP_DIR}.index
 fi
@@ -148,9 +155,9 @@ fi
 if [ "$1" = "run_webhook" ]; then
     if [ "$2" != "" ]; then
         SERVER_NAME=$2
-        sh ../run_fly_io.sh set_webhook $2
+        sh $0 set_webhook $2
     fi
-    # python index.py
+    run_venv
     cd ..
     python -m ${APP_DIR}.index
 fi
