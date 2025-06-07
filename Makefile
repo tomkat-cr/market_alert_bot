@@ -39,6 +39,9 @@ create_app:
 set_vars:
 	${SHELL} ./run_fly_io.sh set_vars
 
+set_var_api_endpoint:
+	${SHELL} ./run_fly_io.sh set_var_api_endpoint
+
 run_ngrok:
 	${SHELL} ./run_fly_io.sh run_ngrok
 

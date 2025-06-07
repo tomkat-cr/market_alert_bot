@@ -21,8 +21,22 @@ def crypto(symbol, currency, debug):
 def usdveb(debug):
     debug = "1" if debug else "0"
     url = settings.APIS_COMMON_SERVER_NAME + \
-        f'/usdvef/{str(debug)}'
+        f'/usdveb/{str(debug)}'
     return generic_api_call(url, 'Venezuelan Bolivar Exchange')
+
+
+def usdveb_full(debug):
+    debug = "1" if debug else "0"
+    url = settings.APIS_COMMON_SERVER_NAME + \
+        f'/usdveb_full/{str(debug)}'
+    return generic_api_call(url, 'Venezuelan Bolivar Exchange (Full)')
+
+
+def usdveb_monitor(debug):
+    debug = "1" if debug else "0"
+    url = settings.APIS_COMMON_SERVER_NAME + \
+        f'/usdveb_monitor/{str(debug)}'
+    return generic_api_call(url, 'Venezuelan Bolivar Exchange (Monitor)')
 
 
 def usdcop(debug):

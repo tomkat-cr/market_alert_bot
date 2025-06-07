@@ -17,23 +17,31 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
-## Unreleased
-## 1.1.0 (2025-05-17)
+## 1.1.0 (2025-05-23)
 ---
 
 ### New
 CHANGELOG file added with commit history up to v1.0.1
 Makefile file added
-run_fly_io.sh: update option added to update requirements.txt and venv
+Add /veb command to get ONLY the official USD to VEB (Venezuelan Bolivar) exchange rate from the Central Bank (BCV).
+Add /mon command to get the USD to VEB from MonitorDolarVenezuela.
+Add /bsf command to get both the official USD to VEB + MonitorDolarVenezuela.
+Add the /usdveb_full and /usdveb_monitor mediabros_apis API calls.
+Add "update" option to run_fly_io.sh to update dependencies versions, requirements.txt and venv.
+Add "set_var_api_endpoint" option to run_fly_io.sh to set APIS_COMMON_SERVER_NAME only
 
 ### Changes
 Update telegram bot api calling to the latest version.
+Change /vef to /veb in the mediabros_apis API call.
 
 ### Fixes
 requirements.txt updated to solve snyk vulnerabilities
 run_fly_io.sh: clean change dir to api before running
-Fix "run_docker" and "run_webhook"Makefile entries with the correct execution parameter for "./run_fly_io.sh".
+Fix "run_docker" and "run_webhook" Makefile entries with the correct execution parameter for "./run_fly_io.sh".
 Fix "run_ngrok" replacing "./node_modules/ngrok/bin/ngrok..." with "npx ngrok http $PORT".
+
+### Breaks
+The /veb command does not include the DolarToday data as mediabros_apis API deprecated it.
 
 
 ## 1.0.0 (2023-02-05)

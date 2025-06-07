@@ -103,6 +103,12 @@ if [ "$1" = "create_app" ]; then
     flyctl apps create ${FLYIO_APP_NAME}
 fi
 
+if [ "$1" = "set_var_api_endpoint" ]; then
+    cd "${APP_DIR}"
+    echo "Setting only: APIS_COMMON_SERVER_NAME = ${APIS_COMMON_SERVER_NAME}"
+    flyctl secrets set APIS_COMMON_SERVER_NAME=${APIS_COMMON_SERVER_NAME}
+fi
+
 if [[ "$1" = "create_app" || "$1" = "set_vars" ]]; then
     cd "${APP_DIR}"
     echo "Setting: APIS_COMMON_SERVER_NAME = ${APIS_COMMON_SERVER_NAME}"

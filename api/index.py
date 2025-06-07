@@ -9,7 +9,8 @@ from .utility_telegram import get_command_params, get_updates_debug
 from .utility_general import serial_ports, log_endpoint_debug, log_normal
 from .settings import settings
 from .utility_auth import get_user_authentication, login_handler
-from .api_processing import usdcop, usdveb, veb_cop, crypto, openai_api
+from .api_processing import \
+    usdcop, usdveb, usdveb_full, usdveb_monitor, veb_cop, crypto, openai_api
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -45,13 +46,16 @@ async def help(update, context):
         'Command Help:\n\n'
         '/help = get this documentation.\n'
         '\n'
+        '/bs = get the official USD to VEB (Venezuelan Bolivar)'
+        ' exchange rate from the Central Bank (BCV).\n'
+        '/bsf = USD to VEB (BCV + Monitor).\n'
+        '/mon = USD to VEB (Monitor).\n'
+        '\n'
         '/cop = get the USD to COP (Colombian Peso)'
         ' exchange rate.\n'
         '/cur cop = same as /cop\n'
         '/currency usdcop = same as /cop\n'
         '\n'
-        '/bs = get the USD to VEB (Venezuelan Bolivar)'
-        ' exchange rate.\n'
         '/cur bs = same as /bs\n'
         '/cur veb = same as /bs\n'
         '/cur vef = same as /bs\n'
@@ -59,13 +63,14 @@ async def help(update, context):
         '\n'
         '/copveb = get the COP/Bs exchange rate.\n'
         '/cur copveb = same as /copveb\n'
+        '\n'
         '/vebcop = get the Bs/COP exchange rate.\n'
         '/cur vebcop = same as /vebcop\n'
         '\n'
         '/crypto [symbol] [currency] = get the crypto currency exchange to'
         ' to the specified currency (USD by default).\n'
-        ' [symbol] can be btc, eth, sol, ada, xrp, etc.\n'
-        ' [currency] can be USD, EUR, etc.\n'
+        ' [symbol] can be: btc, eth, sol, ada, xrp, etc.\n'
+        ' [currency] can be: USD, EUR, etc.\n'
         '\n'
         'NOTE: adding "/debug" makes the command to return the API\'s'
         ' raw responses.'
@@ -82,6 +87,10 @@ async def currency_exchange(update, context):
     currency_pair = ''
     if cmd_par['command'] == '/bs':
         currency_pair = 'usdveb'
+    elif cmd_par['command'] == '/bsf':
+        currency_pair = 'bsf'
+    elif cmd_par['command'] == '/mon':
+        currency_pair = 'mon'
     elif cmd_par['command'] == '/cop':
         currency_pair = 'usdcop'
     elif cmd_par['command'] == '/vebcop':
@@ -114,6 +123,10 @@ async def currency_exchange(update, context):
         response_message = usdcop(cmd_par['debug'])
     elif currency_pair in ('usdveb', 'veb', 'vef', 'bs'):
         response_message = usdveb(cmd_par['debug'])
+    elif currency_pair in ('bsf'):
+        response_message = usdveb_full(cmd_par['debug'])
+    elif currency_pair in ('mon'):
+        response_message = usdveb_monitor(cmd_par['debug'])
     elif currency_pair in ('usdbtc', 'btc'):
         response_message = crypto('btc', 'usd', cmd_par['debug'])
     elif currency_pair in ('usdeth', 'eth'):
@@ -191,9 +204,9 @@ def main():
     bot_version = get_bot_version()
 
     bot_run_mode = settings.RUN_MODE
-    bot_listen_addr = settings.LISTEN_ADDR
-    bot_port = settings.PORT
-    bot_server_name = settings.SERVER_NAME
+    # bot_listen_addr = settings.LISTEN_ADDR
+    # bot_port = settings.PORT
+    # bot_server_name = settings.SERVER_NAME
     telegram_bot_token = settings.TELEGRAM_BOT_TOKEN
 
     # Updater creationx
