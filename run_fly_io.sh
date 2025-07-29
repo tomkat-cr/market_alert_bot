@@ -90,7 +90,7 @@ if [ "$1" = "clean" ]; then
 fi
 
 if [ "$1" = "update" ]; then
-    rm "${APP_DIR}/requirements.txt"
+    rm -f "${APP_DIR}/requirements.txt"
     run_clean
     run_venv
     run_deactivate

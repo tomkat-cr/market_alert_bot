@@ -209,7 +209,7 @@ def main():
     # bot_server_name = settings.SERVER_NAME
     telegram_bot_token = settings.TELEGRAM_BOT_TOKEN
 
-    # Updater creationx
+    # Updater creation
     application = Application.builder().token(telegram_bot_token).build()
 
     # /start command
