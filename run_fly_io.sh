@@ -25,14 +25,23 @@ run_clean() {
 }
 
 run_fresh_install() {
-    pip install python-telegram-bot
-    pip install pyserial
-    pip install a2wsgi
-    pip install requests-toolbelt
-    pip install pymongo
-    pip install pydantic
-    pip install werkzeug
-    pip install setuptools
+    if ! pip install --upgrade pip; then
+        echo "Error: pip install --upgrade pip failed"
+        exit 1
+    fi
+    if ! pip install \
+        python-telegram-bot \
+        pyserial \
+        a2wsgi \
+        requests-toolbelt \
+        pymongo \
+        pydantic \
+        werkzeug \
+        setuptools
+    then
+        echo "Error: pip install failed"
+        exit 1
+    fi
     pip freeze > requirements.txt
     # Add setuptools to requirements.txt if not already there
     if ! grep -q "setuptools" requirements.txt; then
@@ -52,7 +61,9 @@ run_venv() {
     fi
 }
 
-APP_DIR='api'
+BASE_DIR="$(pwd)"
+APP_DIR="${BASE_DIR}/api"
+
 if [ -f "./.env" ]; then
     ENV_FILESPEC="./.env"
 else

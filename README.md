@@ -4,10 +4,10 @@ This BOT shows the currency conversion of COP (Colombian Pesos) and VEB (Venezue
 
 ## Requirements
 
-- git
-- Python 3.11
-- fly.io
-- ngrok
+- Git
+- Python 3.13
+- Fly.io
+- Ngrok (optional)
 
 ## How to use the BOT
 
@@ -35,6 +35,14 @@ cd market_alert_bot
 
 ```bash
 make install
+```
+
+## Dependencies update
+
+- Run this command:
+
+```bash
+make update
 ```
 
 ## How to deploy to fly.io

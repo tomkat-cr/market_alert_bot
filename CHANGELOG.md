@@ -17,31 +17,33 @@ This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a Ch
 ### Breaks
 
 
-## 1.1.0 (2025-05-23)
+## 1.1.0 (2025-07-28)
 ---
 
 ### New
-CHANGELOG file added with commit history up to v1.0.1
-Makefile file added
-Add /veb command to get ONLY the official USD to VEB (Venezuelan Bolivar) exchange rate from the Central Bank (BCV).
-Add /mon command to get the USD to VEB from MonitorDolarVenezuela.
-Add /bsf command to get both the official USD to VEB + MonitorDolarVenezuela.
-Add the /usdveb_full and /usdveb_monitor mediabros_apis API calls.
-Add "update" option to run_fly_io.sh to update dependencies versions, requirements.txt and venv.
-Add "set_var_api_endpoint" option to run_fly_io.sh to set APIS_COMMON_SERVER_NAME only
+CHANGELOG file added with commit history up to v1.0.1.
+Makefile file added.
+Add /veb command to get ONLY the official USD to VEB (Venezuelan Bolivar) exchange rate from the Central Bank (BCV) [GS-204].
+Add /mon command to get the USD to VEB from MonitorDolarVenezuela [GS-204].
+Add /bsf command to get both the official USD to VEB + MonitorDolarVenezuela [GS-204].
+Add the /usdveb_full and /usdveb_monitor mediabros_apis API calls [GS-204].
+Add "update" option to run_fly_io.sh to update dependencies versions, requirements.txt and venv [GS-219].
+Add "set_var_api_endpoint" option to run_fly_io.sh to set APIS_COMMON_SERVER_NAME only [GS-204].
 
 ### Changes
-Update telegram bot api calling to the latest version.
-Change /vef to /veb in the mediabros_apis API call.
+Update telegram bot api calling to the latest version [GS-204].
+Change /vef to /veb in the mediabros_apis API call [GS-204].
+Update Dockerfile and local development to use Python 3.13 [GS-219].
+Improve dependency management in deployment scripts [GS-204].
 
 ### Fixes
-requirements.txt updated to solve snyk vulnerabilities
-run_fly_io.sh: clean change dir to api before running
-Fix "run_docker" and "run_webhook" Makefile entries with the correct execution parameter for "./run_fly_io.sh".
-Fix "run_ngrok" replacing "./node_modules/ngrok/bin/ngrok..." with "npx ngrok http $PORT".
+requirements.txt updated to solve snyk vulnerabilities [GS-219].
+run_fly_io.sh: clean change dir to api before running [GS-204].
+Fix "run_docker" and "run_webhook" Makefile entries with the correct execution parameter for "./run_fly_io.sh" [GS-204].
+Fix "run_ngrok" replacing "./node_modules/ngrok/bin/ngrok..." with "npx ngrok http $PORT" [GS-204].
 
 ### Breaks
-The /veb command does not include the DolarToday data as mediabros_apis API deprecated it.
+The /veb command does not include the DolarToday data as mediabros_apis API deprecated it [GS-204].
 
 
 ## 1.0.0 (2023-02-05)
