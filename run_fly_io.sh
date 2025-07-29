@@ -80,10 +80,6 @@ if [ "$1" = "deactivate" ]; then
     run_deactivate
 fi
 
-# if [[ "$1" != "deactivate" && "$1" != "pipfile" && "$1" != "clean" && "$1" != "set_webhook" && "$1" != "update" ]]; then
-#     run_venv
-# fi
-
 if [ "$1" = "pipfile" ]; then
     # deactivate ;
     pipenv lock

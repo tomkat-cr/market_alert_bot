@@ -228,6 +228,8 @@ def main():
 
     # Currency shortcuts
     application.add_handler(CommandHandler('bs', currency_exchange))
+    application.add_handler(CommandHandler('bsf', currency_exchange))
+    application.add_handler(CommandHandler('mon', currency_exchange))
     application.add_handler(CommandHandler('cop', currency_exchange))
     application.add_handler(CommandHandler('vebcop', currency_exchange))
     application.add_handler(CommandHandler('copveb', currency_exchange))
