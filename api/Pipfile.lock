@@ -1,0 +1,23 @@
+{
+    "_meta": {
+        "hash": {
+            "sha256": "4531b38c7edc80bc9199f3b2f0a3ed7acddfbd1932bee55c72ec67b7ad508858"
+        },
+        "pipfile-spec": 6,
+        "requires": {
+            "python_version": "3.10"
+        },
+        "sources": [
+            {
+                "name": "pypi",
+                "url": "https://pypi.org/simple",
+                "verify_ssl": true
+            }
+        ]
+    },
+    "default": {
+        "pyserial": "*",
+        "python-telegram-bot": "*"
+    },
+    "develop": {}
+}

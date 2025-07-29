@@ -2,6 +2,13 @@
 Telegram Market Alert BOT in Python.
 This BOT shows the currency conversion of COP (Colombian Pesos) and VEB (Venezuelan Bs) to US Dollars, and any Crypto currency value in US Dollar.
 
+## Requirements
+
+- Git
+- Python 3.13
+- Fly.io
+- Ngrok (optional)
+
 ## How to use the BOT
 
 - Go to Telegram and search for: `ocr_marketalert`
@@ -21,6 +28,22 @@ cd market_alert_bot
 ```
 
 - All the magic is in the `index.py` file on the `api` directory...
+
+## Installation
+
+- Run this command:
+
+```bash
+make install
+```
+
+## Dependencies update
+
+- Run this command:
+
+```bash
+make update
+```
 
 ## How to deploy to fly.io
 

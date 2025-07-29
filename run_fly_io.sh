@@ -2,44 +2,18 @@
 # run_fly_io.sh
 # 2022-12-31 | CR
 #
-APP_DIR='api'
-if [ -f "./.env" ]; then
-    ENV_FILESPEC="./.env"
-else
-    ENV_FILESPEC="../.env"
-fi
-set -o allexport; source ${ENV_FILESPEC}; set +o allexport ;
-if [ "$PORT" = "" ]; then
-    PORT="8000"
-fi
-if [ "$1" = "deactivate" ]; then
-    cd ${APP_DIR} ;
-    deactivate ;
-fi
-if [[ "$1" != "deactivate" && "$1" != "pipfile" && "$1" != "clean" && "$1" != "set_webhook" ]]; then
-    python3 -m venv ${APP_DIR} ;
-    . ${APP_DIR}/bin/activate ;
-    cd ${APP_DIR} ;
-    if [ -f "requirements.txt" ]; then
-        pip3 install -r requirements.txt
-    else
-        pip install python-telegram-bot
-        pip install pyserial
-        pip install a2wsgi
-        pip install requests-toolbelt
-        pip install pymongo
-        pip install pydantic
-        pip install werkzeug
-        pip freeze > requirements.txt
-    fi
-fi
-if [ "$1" = "pipfile" ]; then
-    deactivate ;
-    pipenv lock
-fi
-if [ "$1" = "clean" ]; then
+
+run_deactivate() {
+    cd "${APP_DIR}"
+    deactivate
+    cd ..
+}
+
+run_clean() {
+    cd "${APP_DIR}"
+    pwd
     echo "Cleaning..."
-    deactivate ;
+    # deactivate ;
     rm -rf __pycache__ ;
     rm -rf bin ;
     rm -rf include ;
@@ -47,21 +21,105 @@ if [ "$1" = "clean" ]; then
     rm -rf pyvenv.cfg ;
     rm -rf ../.vercel/cache ;
     ls -lah
+    cd ..
+}
+
+run_fresh_install() {
+    if ! pip install --upgrade pip; then
+        echo "Error: pip install --upgrade pip failed"
+        exit 1
+    fi
+    if ! pip install \
+        python-telegram-bot \
+        pyserial \
+        a2wsgi \
+        requests-toolbelt \
+        pymongo \
+        pydantic \
+        werkzeug \
+        setuptools
+    then
+        echo "Error: pip install failed"
+        exit 1
+    fi
+    pip freeze > requirements.txt
+    # Add setuptools to requirements.txt if not already there
+    if ! grep -q "setuptools" requirements.txt; then
+        echo "setuptools>=70.0.0 # not directly required, pinned by Snyk to avoid a vulnerability" >> requirements.txt
+    fi
+}
+
+run_venv() {
+    pwd
+    python3 -m venv ${APP_DIR} ;
+    . ${APP_DIR}/bin/activate ;
+    cd ${APP_DIR} ;
+    if [ -f "requirements.txt" ]; then
+        pip3 install -r requirements.txt
+    else
+        run_fresh_install
+    fi
+}
+
+BASE_DIR="$(pwd)"
+APP_DIR="${BASE_DIR}/api"
+
+if [ -f "./.env" ]; then
+    ENV_FILESPEC="./.env"
+else
+    ENV_FILESPEC="../.env"
+fi
+
+set -o allexport; source ${ENV_FILESPEC}; set +o allexport ;
+
+if [ "$PORT" = "" ]; then
+    PORT="8000"
+fi
+
+if [ "$1" = "deactivate" ]; then
+    run_deactivate
+fi
+
+if [ "$1" = "pipfile" ]; then
+    # deactivate ;
+    pipenv lock
+fi
+
+if [ "$1" = "clean" ]; then
+    run_clean
+fi
+
+if [ "$1" = "update" ]; then
+    rm -f "${APP_DIR}/requirements.txt"
+    run_clean
+    run_venv
+    run_deactivate
 fi
 
 if [[ "$1" = "test" ]]; then
     # echo "Error: no test specified" && exit 1
+    run_venv
     echo "Run test..."
     python -m pytest
     echo "Done..."
 fi
 
 if [ "$1" = "create_app" ]; then
+    cd "${APP_DIR}"
     flyctl auth login
     flyctl apps create ${FLYIO_APP_NAME}
 fi
 
+if [ "$1" = "set_var_api_endpoint" ]; then
+    cd "${APP_DIR}"
+    echo "Setting only: APIS_COMMON_SERVER_NAME = ${APIS_COMMON_SERVER_NAME}"
+    flyctl secrets set APIS_COMMON_SERVER_NAME=${APIS_COMMON_SERVER_NAME}
+fi
+
 if [[ "$1" = "create_app" || "$1" = "set_vars" ]]; then
+    cd "${APP_DIR}"
+    echo "Setting: APIS_COMMON_SERVER_NAME = ${APIS_COMMON_SERVER_NAME}"
+    flyctl secrets set APIS_COMMON_SERVER_NAME=${APIS_COMMON_SERVER_NAME}
     echo "Setting: TELEGRAM_BOT_TOKEN = *****"
     flyctl secrets set TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
     echo "Setting: TELEGRAM_CHAT_ID = ${TELEGRAM_CHAT_ID}"
@@ -70,8 +128,6 @@ if [[ "$1" = "create_app" || "$1" = "set_vars" ]]; then
     flyctl secrets set SERVER_NAME=${FLYIO_APP_NAME}.fly.dev
     echo "Setting: RUN_MODE = cli"
     flyctl secrets set RUN_MODE=cli
-    echo "Setting: APIS_COMMON_SERVER_NAME = ${APIS_COMMON_SERVER_NAME}"
-    flyctl secrets set APIS_COMMON_SERVER_NAME=${APIS_COMMON_SERVER_NAME}
     echo "Setting: DB_URI = *******"
     flyctl secrets set DB_URI=${DB_URI}
     echo "Setting: DB_NAME = ${DB_NAME}"
@@ -79,37 +135,46 @@ if [[ "$1" = "create_app" || "$1" = "set_vars" ]]; then
 fi
 
 if [ "$1" = "restart" ]; then
+    cd "${APP_DIR}"
     flyctl apps restart ${FLYIO_APP_NAME} ;
 fi
 
 if [ "$1" = "deploy" ]; then
+    run_venv
     flyctl deploy ;
 fi
+
 if [ "$1" = "deploy_prod" ]; then
+    run_venv
     flyctl deploy ;
 fi
 
 if [ "$1" = "run_docker" ]; then
+    cd "${APP_DIR}"
     docker-compose up -d
 fi
 
 if [ "$1" = "run_ngrok" ]; then
-    ../node_modules/ngrok/bin/ngrok http $PORT
+    # ../node_modules/ngrok/bin/ngrok http $PORT
+    npx ngrok http $PORT
 fi
+
 if [ "$1" = "run" ]; then
-    # python index.py
+    run_venv
     cd ..
     python -m ${APP_DIR}.index
 fi
+
 if [ "$1" = "run_webhook" ]; then
     if [ "$2" != "" ]; then
         SERVER_NAME=$2
-        sh ../run_fly_io.sh set_webhook $2
+        sh $0 set_webhook $2
     fi
-    # python index.py
+    run_venv
     cd ..
     python -m ${APP_DIR}.index
 fi
+
 if [ "$1" = "set_webhook" ]; then
     # curl -X POST https://api.telegram.org/bot<YOUR-BOT-TOKEN>/setWebhook -H "Content-type: application/json" -d '{"url": "https://project-name.username.vercel.app/api/webhook"}'
     BOT_URL="https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}"
